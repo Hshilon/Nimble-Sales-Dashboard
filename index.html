@@ -1,13 +1,509 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>דשבורד הקדמות</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>דשבורד הקדמת חשבוניות – מרץ 2026</title>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f4f6fb;color:#1a1a2e;direction:rtl}
+header{background:#1a2744;color:#fff;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+header h1{font-size:19px;font-weight:600}
+header .sub{font-size:12px;color:#a8b8d8;margin-top:2px}
+.rate-box{background:#253660;border-radius:8px;padding:7px 14px;font-size:12px;color:#7ec8e3}
+.rate-box span{font-weight:700;font-size:15px;color:#fff}
+/* Tabs */
+.tabs{display:flex;background:#fff;border-bottom:2px solid #e4e8f0;padding:0 24px}
+.tab{padding:12px 22px;font-size:13px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;color:#6b7a99;transition:all .2s}
+.tab.active{color:#1a2744;border-bottom-color:#2979d4}
+.tab:hover:not(.active){color:#1a2744}
+.tab-panel{display:none}.tab-panel.active{display:block}
+/* Layout */
+.main{max-width:1240px;margin:0 auto;padding:20px 18px}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi{background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-top:4px solid}
+.kpi.blue{border-color:#2979d4}.kpi.green{border-color:#1a9e75}.kpi.teal{border-color:#00acc1}.kpi.red{border-color:#e05252}.kpi.purple{border-color:#7c3aed}.kpi.orange{border-color:#e09000}
+.kpi-label{font-size:11px;color:#6b7a99;margin-bottom:5px;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.kpi-value{font-size:23px;font-weight:700;color:#1a1a2e;line-height:1}
+.kpi-sub{font-size:11px;color:#9baac0;margin-top:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+.grid3{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:18px}
+.card{background:#fff;border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.card h2{font-size:13px;font-weight:600;color:#1a2744;margin-bottom:14px;padding-bottom:9px;border-bottom:1px solid #eef0f5}
+.chart-wrap{position:relative;width:100%;height:250px}
+.chart-wrap-lg{position:relative;width:100%;height:300px}
+.chart-wrap-sm{position:relative;width:100%;height:200px}
+/* Tables */
+.tbl-wrap{overflow-x:auto;max-height:420px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{background:#f7f8fc;color:#6b7a99;font-weight:600;font-size:11px;padding:8px 9px;border-bottom:2px solid #eef0f5;white-space:nowrap;position:sticky;top:0;z-index:1}
+tbody td{padding:6px 9px;border-bottom:1px solid #f0f2f7;color:#2a2e3d;white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#f7f9ff}
+/* Badges */
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600}
+.b-dis{background:#e8f0fd;color:#2254a3}.b-mer{background:#e6f6f0;color:#0e7a55}
+.b-leu{background:#fef5e5;color:#9a6200}.b-nim{background:#f5edfd;color:#7b2bb5}
+.usd-badge{background:#fff3e0;color:#b45309;font-size:10px;padding:1px 6px;border-radius:4px;font-weight:600}
+/* Availability specific */
+.avail-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.prob-bar{height:6px;border-radius:3px;margin-top:4px}
+.prob-high{background:#1a9e75}.prob-med{background:#e09000}.prob-low{background:#e05252}
+.tag-high{background:#e6f6f0;color:#0e7a55;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;display:inline-block}
+.tag-med{background:#fef5e5;color:#9a6200;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;display:inline-block}
+.tag-low{background:#fdeaea;color:#b91c1c;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;display:inline-block}
+.tag-zero{background:#f0f2f7;color:#9baac0;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;display:inline-block}
+/* Group filter */
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center}
+.filter-btn{font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid #d0d5e0;background:#fff;cursor:pointer;color:#4a5568;font-weight:500;transition:all .15s}
+.filter-btn.active,.filter-btn:hover{background:#2979d4;color:#fff;border-color:#2979d4}
+/* Legend */
+.legend-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#4a5568}
+.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+/* Change indicator */
+.chg-pos{color:#1a9e75;font-weight:600}.chg-neg{color:#e05252;font-weight:600}.chg-zero{color:#9baac0}
+footer{text-align:center;color:#9baac0;font-size:11px;padding:16px}
+@media(max-width:700px){.kpi-row,.avail-kpi-row{grid-template-columns:1fr 1fr}.grid2,.grid3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>דשבורד הקדמת חשבוניות</h1><div class="sub">מרץ 2026 · עדכון: 24.03.2026</div></div>
+  <div class="rate-box">שער דולר–שקל &nbsp;<span>3.105 ₪/$</span></div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('factoring')">הקדמות החודש</div>
+  <div class="tab" onclick="switchTab('availability')">זמינות להקדמה</div>
+  <div class="tab" onclick="switchTab('elektra')">אלקטרה קמעונאות</div>
+</div>
+
+<!-- ===== TAB 1: FACTORING ===== -->
+<div id="tab-factoring" class="tab-panel active">
+<div class="main">
+  <div class="kpi-row" id="kpiRow1"></div>
+  <div class="grid2">
+    <div class="card"><h2>סכום ממומן לפי תאגיד (₪)</h2><div class="chart-wrap-lg"><canvas id="cCorp"></canvas></div></div>
+    <div class="card"><h2>מספר חשבוניות לפי תאגיד</h2><div class="chart-wrap"><canvas id="cCount"></canvas></div></div>
+  </div>
+  <div class="grid3">
+    <div class="card">
+      <h2>פילוח לפי מממן (₪)</h2>
+      <div class="legend-row" id="funderLegend"></div>
+      <div class="chart-wrap-sm"><canvas id="cFunder"></canvas></div>
+    </div>
+    <div class="card"><h2>פילוח מטבע</h2><div class="chart-wrap-sm"><canvas id="cCurrency"></canvas></div></div>
+  </div>
+  <div class="card"><h2>פירוט לפי תאגיד</h2><div class="tbl-wrap"><table id="corpTable"></table></div></div>
+</div>
+</div>
+
+<!-- ===== TAB 2: AVAILABILITY ===== -->
+<div id="tab-availability" class="tab-panel">
+<div class="main">
+  <div class="avail-kpi-row" id="kpiRow2"></div>
+  <div class="grid2">
+    <div class="card"><h2>זמין להקדמה לפי קבוצה (₪)</h2><div class="chart-wrap"><canvas id="cAvailGroup"></canvas></div></div>
+    <div class="card"><h2>הוקדם vs נפרע מתחילת הפעילות (₪)</h2><div class="chart-wrap"><canvas id="cHistory"></canvas></div></div>
+  </div>
+  <div class="card">
+    <h2>פירוט ספקים – זמינות והסתברות הקדמה</h2>
+    <div class="filters" id="groupFilters"></div>
+    <div class="tbl-wrap"><table id="availTable"></table></div>
+  </div>
+</div>
+</div>
+
+<!-- ===== TAB 3: ELEKTRA ===== -->
+<div id="tab-elektra" class="tab-panel">
+<div class="main">
+  <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:12px 18px;margin-bottom:18px;font-size:13px;color:#7a5800;display:flex;align-items:center;gap:10px">
+    <span style="font-size:18px">⚠️</span>
+    <span><b>הנחה:</b> ברימאג דיגיטל ושריג אלקטריק <b>אינם זמינים להקדמה</b> — מחושב ללא שני ספקים אלו.</span>
+  </div>
+  <div class="kpi-row" id="kpiRow3" style="grid-template-columns:repeat(4,1fr)"></div>
+  <div class="grid2" style="margin-bottom:18px">
+    <div class="card"><h2>זמין להקדמה לפי ספק (ללא ברימאג + שריג)</h2><div class="chart-wrap-lg"><canvas id="cElektraAvail"></canvas></div></div>
+    <div class="card"><h2>פעילות מצטברת לפי ספק</h2><div class="chart-wrap-lg"><canvas id="cElektraHistory"></canvas></div></div>
+  </div>
+  <div class="card">
+    <h2>פירוט ספקי אלקטרה קמעונאות — תמונת מצב מלאה</h2>
+    <div class="tbl-wrap"><table id="elektraTable"></table></div>
+  </div>
+</div>
+</div>
+
+<footer>שער דולר–שקל: 3.105 &nbsp;|&nbsp; נתונים: מרץ 2026 &nbsp;|&nbsp; הופק ב-24.03.2026</footer>
+
+<script>
+const USD=3.105;
+function fmt(n){return Math.round(n).toLocaleString('he-IL')}
+function fmtM(n){return (Math.round(n/100000)/10).toLocaleString('he-IL')+'M'}
+function toILS(a,c){return c==='USD'?a*USD:a}
+
+// ── TAB 1 DATA ──────────────────────────────────────────────
+const fact=[
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:135329.83,cur:'ILS'},{corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:150632.2,cur:'ILS'},
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:118005.88,cur:'ILS'},{corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:635651.58,cur:'ILS'},
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:1412932.87,cur:'ILS'},{corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:234512.91,cur:'ILS'},
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:75241.68,cur:'ILS'},{corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:1534,cur:'ILS'},
+  {corp:'קבוצת גולף',funder:'דיסקונט',amt:76164.04,cur:'ILS'},{corp:'אפקון בקרה',funder:'דיסקונט',amt:173944.45,cur:'ILS'},
+  {corp:'אדמה אגן',funder:'דיסקונט',amt:24900,cur:'USD'},{corp:'אדמה אגן',funder:'דיסקונט',amt:94742.52,cur:'ILS'},
+  {corp:'אדמה אגן',funder:'דיסקונט',amt:379046.68,cur:'ILS'},{corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:403.01,cur:'ILS'},
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:143142.89,cur:'ILS'},{corp:'אדמה מכתשים',funder:'דיסקונט',amt:101913.46,cur:'ILS'},
+  {corp:'אדמה מכתשים',funder:'דיסקונט',amt:1758.2,cur:'ILS'},{corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:56323.13,cur:'ILS'},
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:48474.28,cur:'ILS'},{corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:183372,cur:'ILS'},
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:7327.8,cur:'ILS'},{corp:'אפקון בקרה',funder:'דיסקונט',amt:353849.26,cur:'ILS'},
+  {corp:'התעשיה האוירית',funder:'דיסקונט',amt:8210071.84,cur:'ILS'},{corp:'התעשיה האוירית',funder:'דיסקונט',amt:13918.1,cur:'ILS'},
+  {corp:'א.ל ספורט',funder:'דיסקונט',amt:4082.8,cur:'ILS'},{corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:25720.98,cur:'ILS'},
+  {corp:'אפקון החזקות',funder:'דיסקונט',amt:2360000,cur:'ILS'},{corp:'התעשיה האוירית',funder:'דיסקונט',amt:79592.4,cur:'ILS'},
+  {corp:'התעשיה האוירית',funder:'דיסקונט',amt:3080,cur:'ILS'},{corp:'התעשיה האוירית',funder:'דיסקונט',amt:75900,cur:'ILS'},
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:3191.99,cur:'ILS'},{corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:89042.98,cur:'ILS'},
+  {corp:'מועצה מקומית חורפיש',funder:'מרכנתיל',amt:938476.2,cur:'ILS'},{corp:'אדמה אגן',funder:'דיסקונט',amt:341709.12,cur:'ILS'},
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:25821.5,cur:'ILS'},{corp:'יס שירותי טלוויזיה',funder:'דיסקונט',amt:2560632,cur:'ILS'},
+  {corp:'א.ל ספורט',funder:'דיסקונט',amt:1510.4,cur:'ILS'},{corp:'אדמה אגן',funder:'דיסקונט',amt:27140,cur:'USD'},
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:148919.98,cur:'ILS'},{corp:'אלקטרה מוצרי צריכה',funder:'דיסקונט',amt:110277.08,cur:'ILS'},
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:153315.14,cur:'ILS'},{corp:'אלתא מערכות',funder:'דיסקונט',amt:136320,cur:'USD'},
+  {corp:'אלתא מערכות',funder:'דיסקונט',amt:136320,cur:'USD'},{corp:'אלתא מערכות',funder:'דיסקונט',amt:186320,cur:'USD'},
+  {corp:'אלקטרה מוצרי צריכה',funder:'דיסקונט',amt:1888,cur:'ILS'},{corp:'מועצה מקומית חורפיש',funder:'מרכנתיל',amt:602208,cur:'ILS'},
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:1132.8,cur:'ILS'},{corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:39758.91,cur:'ILS'},
+  {corp:'גוד פארם',funder:'דיסקונט',amt:561983.28,cur:'ILS'},{corp:'אדמה אגן',funder:'דיסקונט',amt:731025,cur:'ILS'},
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:403.01,cur:'ILS'},{corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:247259.9,cur:'ILS'},
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:1427.8,cur:'ILS'},{corp:'גוד פארם',funder:'דיסקונט',amt:676938.64,cur:'ILS'},
+  {corp:'אדמה מכתשים',funder:'דיסקונט',amt:117291.53,cur:'ILS'},{corp:'אדמה מכתשים',funder:'דיסקונט',amt:22595,cur:'ILS'},
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:11800,cur:'ILS'},{corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:564639,cur:'ILS'},
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:1782149.24,cur:'ILS'},{corp:'רמי שבירו',funder:'דיסקונט',amt:774211.29,cur:'ILS'},
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:6079027.73,cur:'ILS'},{corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:1209.44,cur:'ILS'},
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:329139.2,cur:'ILS'},{corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:169571.01,cur:'ILS'},
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:113535.35,cur:'ILS'},{corp:'אלתא מערכות',funder:'דיסקונט',amt:136320,cur:'USD'},
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:772498.04,cur:'ILS'},{corp:'קבוצת גולף',funder:'דיסקונט',amt:87580,cur:'ILS'},
+  {corp:'אלקטרה קמעונאות',funder:'דיסקונט',amt:797363.56,cur:'ILS'},{corp:'גוד פארם',funder:'דיסקונט',amt:166177.08,cur:'ILS'},
+  {corp:'רותם אמפרט',funder:'לאומי',amt:896929.24,cur:'ILS'},{corp:'רותם אמפרט',funder:'לאומי',amt:2620535.07,cur:'ILS'},
+  {corp:'אפקון בקרה',funder:'דיסקונט',amt:1586950.52,cur:'ILS'},{corp:'א.א. מחלב',funder:'נימבל',amt:5664,cur:'ILS'},
+  {corp:'מפעלי ים המלח',funder:'נימבל',amt:887185.65,cur:'ILS'},{corp:'א.א. מחלב',funder:'נימבל',amt:94400,cur:'ILS'},
+  {corp:'א.א. מחלב',funder:'נימבל',amt:28886.4,cur:'ILS'},{corp:'א.א. מחלב',funder:'נימבל',amt:92512,cur:'ILS'},
+  {corp:'יהודה רשתות',funder:'נימבל',amt:115202.93,cur:'ILS'},{corp:'עיריית באר שבע',funder:'נימבל',amt:475960.56,cur:'ILS'},
+  {corp:'יהודה פלדות',funder:'נימבל',amt:136529.78,cur:'ILS'},{corp:'א.א. מחלב',funder:'נימבל',amt:472283,cur:'ILS'},
+  {corp:'יהודה גדרות',funder:'נימבל',amt:47733.36,cur:'ILS'},{corp:'א.א. מחלב',funder:'נימבל',amt:154344,cur:'ILS'},
+  {corp:'א.א. מחלב',funder:'נימבל',amt:27092.8,cur:'ILS'},{corp:'א.א. מחלב',funder:'נימבל',amt:30774,cur:'ILS'},
+  {corp:'א.א. מחלב',funder:'נימבל',amt:31340.8,cur:'ILS'},{corp:'א.א. מחלב',funder:'נימבל',amt:22656,cur:'ILS'},
+  {corp:'קבוצת גולף',funder:'נימבל',amt:76145.4,cur:'ILS'},{corp:'א.א. מחלב',funder:'נימבל',amt:55082.4,cur:'ILS'},
+  {corp:'א.א. מחלב',funder:'נימבל',amt:63059.2,cur:'ILS'},{corp:'א.א. מחלב',funder:'נימבל',amt:19021.6,cur:'ILS'},
+  {corp:'א.א. מחלב',funder:'נימבל',amt:6773.2,cur:'ILS'},{corp:'א.א. מחלב',funder:'נימבל',amt:33040,cur:'ILS'},
+  {corp:'א.א. מחלב',funder:'נימבל',amt:13197,cur:'ILS'},{corp:'א.א. מחלב',funder:'נימבל',amt:33606.4,cur:'ILS'},
+  {corp:'א.א. מחלב',funder:'נימבל',amt:33984,cur:'ILS'},{corp:'א.א. מחלב',funder:'נימבל',amt:7694,cur:'ILS'},
+  {corp:'א.א. מחלב',funder:'נימבל',amt:8260,cur:'ILS'},{corp:'א.א. מחלב',funder:'נימבל',amt:55602,cur:'ILS'},
+  {corp:'א.א. מחלב',funder:'נימבל',amt:14820,cur:'ILS'},{corp:'א.א. מחלב',funder:'נימבל',amt:50000,cur:'ILS'},
+  {corp:'א.א. מחלב',funder:'נימבל',amt:19163,cur:'ILS'},{corp:'קבוצת גולף',funder:'נימבל',amt:118000,cur:'ILS'},
+];
+
+// ── TAB 2 DATA ──────────────────────────────────────────────
+const avail=[
+  {group:'א.א. מחלב',client:'א.א. מחלב',supplier:'א.נ קונברטו',paid:0,advanced:50000,chg:0,avail:0,cur:'ILS',approveDate:'08/03/2026'},
+  {group:'א.א. מחלב',client:'א.א. מחלב',supplier:'טדי הובלות',paid:0,advanced:25370,chg:0,avail:0,cur:'ILS',approveDate:'04/02/2026'},
+  {group:'א.א. מחלב',client:'א.א. מחלב',supplier:'ד.נ מישלוחים',paid:484369.8,advanced:882243,chg:0,avail:0,cur:'ILS',approveDate:'17/09/2025'},
+  {group:'א.א. מחלב',client:'א.א. מחלב',supplier:'סייד מחמד',paid:77251,advanced:208054,chg:0,avail:0,cur:'ILS',approveDate:'09/11/2025'},
+  {group:'א.א. מחלב',client:'א.א. מחלב',supplier:'גבארה מוחמד',paid:217403.2,advanced:311756.2,chg:0,avail:0,cur:'ILS',approveDate:'15/07/2025'},
+  {group:'א.א. מחלב',client:'א.א. מחלב',supplier:'זיתון חוסם',paid:1101884,advanced:1442668,chg:0,avail:0,cur:'ILS',approveDate:'15/07/2025'},
+  {group:'א.א. מחלב',client:'א.א. מחלב',supplier:'הובלות אסיה',paid:175453.4,advanced:229072.2,chg:0,avail:0,cur:'ILS',approveDate:'21/09/2025'},
+  {group:'א.א. מחלב',client:'א.א. מחלב',supplier:'י.פ הובלות',paid:3750370.4,advanced:5314671.4,chg:0,avail:0,cur:'ILS',approveDate:'25/06/2025'},
+  {group:'א.א. מחלב',client:'א.א. מחלב',supplier:'חוגיראת אמיר',paid:183478.2,advanced:269099,chg:0,avail:0,cur:'ILS',approveDate:'15/07/2025'},
+  {group:'א.א. מחלב',client:'א.א. מחלב',supplier:'אבו אלהווא',paid:409790.4,advanced:634745.6,chg:0,avail:0,cur:'ILS',approveDate:'26/06/2025'},
+  {group:'א.א. מחלב',client:'א.א. מחלב',supplier:'א.מ הובלות',paid:356099.8,advanced:549620.2,chg:0,avail:0,cur:'ILS',approveDate:'15/07/2025'},
+  {group:'א.א. מחלב',client:'א.א. מחלב',supplier:'תו בי לי הובלות',paid:741742,advanced:896086,chg:0,avail:0,cur:'ILS',approveDate:'22/06/2025'},
+  {group:'א.א. מחלב',client:'א.א. מחלב',supplier:'הובלות עבדאללה',paid:613954,advanced:952142,chg:0,avail:0,cur:'ILS',approveDate:'15/07/2025'},
+  {group:'א.א. מחלב',client:'א.א. מחלב',supplier:'שווא מוסטפא',paid:595080.6,advanced:614243.6,chg:0,avail:0,cur:'ILS',approveDate:'21/07/2025'},
+  {group:'א.א. מחלב',client:'א.א. מחלב',supplier:'אבו לילה נדאל',paid:111429.76,advanced:221306.64,chg:0,avail:0,cur:'ILS',approveDate:'12/11/2025'},
+  {group:'א.א. מחלב',client:'א.א. מחלב',supplier:'הובלות גובראן',paid:96415,advanced:187698.6,chg:0,avail:0,cur:'ILS',approveDate:'27/10/2025'},
+  {group:'א.א. מחלב',client:'א.א. מחלב',supplier:'עבודות קרינאוי',paid:32379,advanced:78616,chg:0,avail:0,cur:'ILS',approveDate:'17/11/2025'},
+  {group:'א.א. מחלב',client:'א.א. מחלב',supplier:'אבו גומעה עלי',paid:337834,advanced:509526.36,chg:0,avail:0,cur:'ILS',approveDate:'15/07/2025'},
+  {group:'אדמה',client:'אדמה אגן',supplier:'משרד להובלה חוף אשדוד',paid:7809228,advanced:8540253,chg:0,avail:1579365,cur:'ILS',approveDate:'02/04/2025'},
+  {group:'אדמה',client:'אדמה אגן',supplier:'הרן שינוע מטענים',paid:1553448.75,advanced:3251360.18,chg:0,avail:0,cur:'ILS',approveDate:'31/03/2025'},
+  {group:'אדמה',client:'אדמה אגן',supplier:'קרולף',paid:128952.45,advanced:128952.45,chg:0,avail:0,cur:'ILS',approveDate:'26/02/2025'},
+  {group:'אדמה',client:'אדמה אגן',supplier:'י.כ. יהלום',paid:1235212.71,advanced:1444911.91,chg:0,avail:0,cur:'ILS',approveDate:'20/07/2025'},
+  {group:'אדמה',client:'אדמה מכתשים',supplier:'משרד להובלה חוף אשדוד',paid:89072,advanced:111667,chg:0,avail:7552,cur:'ILS',approveDate:'02/04/2025'},
+  {group:'אדמה',client:'אדמה מכתשים',supplier:'גל פרויקטים',paid:4440786.25,advanced:5039431.16,chg:0,avail:0,cur:'ILS',approveDate:'26/02/2025'},
+  {group:'אדמה',client:'אדמה מכתשים',supplier:'א.ש. אמירים',paid:1706789.66,advanced:2103412.49,chg:0,avail:0,cur:'ILS',approveDate:'06/03/2025'},
+  {group:'אדמה',client:'אדמה מכתשים',supplier:'אנגיפלס פלסטיקה',paid:589286.53,advanced:1040206.78,chg:0,avail:0,cur:'ILS',approveDate:'08/09/2025'},
+  {group:'אדמה',client:'אדמה אגן',supplier:'קרולף (USD)',paid:1791261,advanced:2112774,chg:0,avail:17775,cur:'USD',approveDate:'26/02/2025'},
+  {group:'א.ל ספורט',client:'א.ל ספורט',supplier:'מאסט משה עמרם',paid:252146.4,advanced:339313,chg:0,avail:8519.6,cur:'ILS',approveDate:'28/10/2025'},
+  {group:'א.ל ספורט',client:'א.ל ספורט',supplier:'ש.ה.ב חשמל',paid:11643.1,advanced:32545.62,chg:0,avail:0,cur:'ILS',approveDate:'29/01/2026'},
+  {group:'א.ל ספורט',client:'א.ל ספורט',supplier:'רה שו',paid:108166.01,advanced:217154.01,chg:0,avail:0,cur:'ILS',approveDate:'23/07/2025'},
+  {group:'אלקטרה מוצרי צריכה',client:'אלקטרה מוצרי צריכה',supplier:'דוד אפריאט מיזוג אויר',paid:0,advanced:110277.08,chg:0,avail:0,cur:'ILS',approveDate:'02/03/2026'},
+  {group:'אלקטרה מוצרי צריכה',client:'אלקטרה מוצרי צריכה',supplier:'שטיבל קום',paid:11505,advanced:11505,chg:0,avail:0,cur:'ILS',approveDate:'24/11/2024'},
+  {group:'אלקטרה מוצרי צריכה',client:'אלקטרה מוצרי צריכה',supplier:'ש.ה.ב חשמל',paid:17269.3,advanced:17269.3,chg:0,avail:0,cur:'ILS',approveDate:'29/01/2026'},
+  {group:'אלקטרה קמעונאות',client:'אלקטרה קמעונאות',supplier:'ברימאג דיגיטל',paid:12149776.19,advanced:18175651.76,chg:0,avail:16885853.63,cur:'ILS',approveDate:'30/06/2025'},
+  {group:'אלקטרה קמעונאות',client:'אלקטרה קמעונאות',supplier:'שריג אלקטריק',paid:0,advanced:10502233.74,chg:0,avail:13299580.94,cur:'ILS',approveDate:'04/02/2026'},
+  {group:'אלקטרה קמעונאות',client:'אלקטרה קמעונאות',supplier:'קריסטלינו',paid:68616958.46,advanced:95170467.5,chg:3410066,avail:4994323,cur:'ILS',approveDate:'30/12/2024'},
+  {group:'אלקטרה קמעונאות',client:'אלקטרה קמעונאות',supplier:'שאוליאן סחר',paid:16330812.46,advanced:22797890.2,chg:251384.58,avail:642732.55,cur:'ILS',approveDate:'26/12/2024'},
+  {group:'אלקטרה קמעונאות',client:'אלקטרה קמעונאות',supplier:'קולדר קירור',paid:801177.91,advanced:801177.91,chg:273.76,avail:528372.18,cur:'ILS',approveDate:'03/11/2024'},
+  {group:'אלקטרה קמעונאות',client:'אלקטרה קמעונאות',supplier:'קנט-לי (1997)',paid:1680602.76,advanced:2786259.87,chg:403.01,avail:455787.55,cur:'ILS',approveDate:'16/07/2025'},
+  {group:'אלקטרה קמעונאות',client:'אלקטרה קמעונאות',supplier:'רונלייט טכ',paid:21133294.7,advanced:31077230.24,chg:396715.24,avail:396715.24,cur:'ILS',approveDate:'11/06/2025'},
+  {group:'אלקטרה קמעונאות',client:'אלקטרה קמעונאות',supplier:'סלימפרייס',paid:8364022.62,advanced:9074211.15,chg:0,avail:354664.71,cur:'ILS',approveDate:'16/10/2024'},
+  {group:'אלקטרה קמעונאות',client:'אלקטרה קמעונאות',supplier:'יוגנד פוטו',paid:1317661.69,advanced:2014510.3,chg:0,avail:286527.87,cur:'ILS',approveDate:'14/12/2025'},
+  {group:'אלקטרה קמעונאות',client:'אלקטרה קמעונאות',supplier:'מאסט משה עמרם',paid:460175.5,advanced:460175.5,chg:214325.7,avail:279654.08,cur:'ILS',approveDate:'28/10/2025'},
+  {group:'אלקטרה קמעונאות',client:'אלקטרה קמעונאות',supplier:'מובייל בי.די.',paid:0,advanced:2199216.65,chg:0,avail:250558.43,cur:'ILS',approveDate:'02/03/2026'},
+  {group:'אלקטרה קמעונאות',client:'אלקטרה קמעונאות',supplier:'סינודן',paid:15395902.04,advanced:18270032.74,chg:77039.28,avail:77039.28,cur:'ILS',approveDate:'25/12/2024'},
+  {group:'אלקטרה קמעונאות',client:'אלקטרה קמעונאות',supplier:'דוגית ששון',paid:190673.89,advanced:190673.89,chg:0,avail:10223,cur:'ILS',approveDate:'12/05/2025'},
+  {group:'אלקטרה קמעונאות',client:'אלקטרה קמעונאות',supplier:'פנדה סטייל',paid:4677.41,advanced:4677.41,chg:0,avail:94035.01,cur:'ILS',approveDate:'29/10/2024'},
+  {group:'אפקון',client:'אפקון בקרה',supplier:'טאלנט סולושנס',paid:1755750.1,advanced:1755750.1,chg:0,avail:0,cur:'ILS',approveDate:'25/12/2025'},
+  {group:'אפקון',client:'אפקון בקרה',supplier:'פלבר ניהול',paid:3075119.04,advanced:4662069.56,chg:0,avail:0,cur:'ILS',approveDate:'16/12/2025'},
+  {group:'אפקון',client:'אפקון בקרה',supplier:'נור מ.ש.',paid:391068.95,advanced:744918.21,chg:0,avail:0,cur:'ILS',approveDate:'23/12/2025'},
+  {group:'אפקון',client:'אפקון החזקות',supplier:'גרינליף מערכות',paid:3398400,advanced:5758400,chg:0,avail:0,cur:'ILS',approveDate:'04/12/2025'},
+  {group:'גוד פארם',client:'גוד פארם',supplier:'גורי ע.ע.ע.',paid:1907489.73,advanced:3146411.65,chg:0,avail:13268.86,cur:'ILS',approveDate:'11/12/2025'},
+  {group:'גוד פארם',client:'גוד פארם',supplier:'אודם קוסמטיקה',paid:765234.8,advanced:1175969.92,chg:0,avail:0,cur:'ILS',approveDate:'10/10/2024'},
+  {group:'התעשיה האוירית',client:'התעשיה האוירית',supplier:'פולדמיר בנין',paid:3675154.64,advanced:3675154.64,chg:0,avail:7420478.89,cur:'ILS',approveDate:'30/12/2025'},
+  {group:'התעשיה האוירית',client:'התעשיה האוירית',supplier:'טאק תעשיות',paid:219571.8,advanced:378144.2,chg:0,avail:55080,cur:'ILS',approveDate:'04/01/2026'},
+  {group:'התעשיה האוירית',client:'התעשיה האוירית',supplier:'קמפוס לדפוס',paid:63884.02,advanced:77802.12,chg:0,avail:1286.2,cur:'ILS',approveDate:'28/11/2024'},
+  {group:'התעשיה האוירית',client:'התעשיה האוירית',supplier:'ביו פרמקס',paid:12032231.08,advanced:20242302.92,chg:0,avail:-2666.8,cur:'ILS',approveDate:'17/09/2025'},
+  {group:'יהודה גדרות',client:'יהודה גדרות',supplier:'מטיילי ירון בר',paid:0,advanced:59666.7,chg:0,avail:0,cur:'ILS',approveDate:'03/02/2026'},
+  {group:'יהודה פלדות',client:'יהודה פלדות',supplier:'מטיילי ירון בר',paid:193502.3,advanced:364164.52,chg:0,avail:0,cur:'ILS',approveDate:'03/02/2026'},
+  {group:'יהודה רשתות',client:'יהודה רשתות',supplier:'מטיילי ירון בר',paid:166627.8,advanced:310631.46,chg:0,avail:0,cur:'ILS',approveDate:'03/02/2026'},
+  {group:'יס',client:'יס שירותי טלוויזיה',supplier:'אחלה טי.וי',paid:2358362,advanced:7294241,chg:0,avail:0,cur:'ILS',approveDate:'01/01/2026'},
+  {group:'מועצה חורפיש',client:'מועצה חורפיש',supplier:'בני עפיף',paid:2773284.84,advanced:2773284.84,chg:0,avail:0,cur:'ILS',approveDate:'16/06/2025'},
+  {group:'מועצה חורפיש',client:'מועצה חורפיש',supplier:'קאלא נהול',paid:3777286,advanced:7805655,chg:0,avail:0,cur:'ILS',approveDate:'17/08/2025'},
+  {group:'מועצה חורפיש',client:'מועצה חורפיש',supplier:'סמ - גד',paid:960881,advanced:3668867.8,chg:0,avail:0,cur:'ILS',approveDate:'28/08/2025'},
+  {group:'מילניום',client:'ולפמן תעשיות',supplier:'בלוקל רביד',paid:0,advanced:0,chg:0,avail:463236,cur:'ILS',approveDate:'05/03/2026'},
+  {group:'מילניום',client:'ולפמן תעשיות',supplier:'עידן 88',paid:0,advanced:0,chg:0,avail:36562,cur:'ILS',approveDate:'16/02/2026'},
+  {group:'מילניום',client:'ולפמן תעשיות',supplier:'משינע חלפים',paid:0,advanced:0,chg:0,avail:18468,cur:'ILS',approveDate:'22/02/2026'},
+  {group:'מילניום',client:'מילניום שרותים',supplier:'משינע חלפים',paid:0,advanced:0,chg:0,avail:39978,cur:'ILS',approveDate:'22/02/2026'},
+  {group:'מילניום',client:'מילניום שרותים',supplier:'עידן 88',paid:0,advanced:0,chg:0,avail:30099,cur:'ILS',approveDate:'16/02/2026'},
+  {group:'מילניום',client:'אמקו ים',supplier:'הובלות משה כהן',paid:0,advanced:0,chg:0,avail:19276,cur:'ILS',approveDate:'19/02/2026'},
+  {group:'מילניום',client:'אמקו ים',supplier:'עידן 88',paid:0,advanced:0,chg:0,avail:5131,cur:'ILS',approveDate:'16/02/2026'},
+  {group:'מילניום',client:'צמיגי המילניום',supplier:'צמיגי נעמן',paid:0,advanced:183018,chg:0,avail:209363,cur:'ILS',approveDate:'25/02/2026'},
+  {group:'מילניום',client:'מסוף מילניום אשדוד',supplier:'מכולנוע',paid:0,advanced:0,chg:0,avail:1829,cur:'ILS',approveDate:'20/01/2026'},
+  {group:'מילניום',client:'מסוף מילניום אשדוד',supplier:'עידן 88',paid:0,advanced:0,chg:0,avail:1090,cur:'ILS',approveDate:'16/02/2026'},
+  {group:'מילניום',client:'מרכז שירות מילניום',supplier:'עידן 88',paid:0,advanced:0,chg:0,avail:2235,cur:'ILS',approveDate:'16/02/2026'},
+  {group:'מילניום',client:'שביט ובניו',supplier:'יונייטד קולור',paid:0,advanced:0,chg:0,avail:64074,cur:'ILS',approveDate:'10/02/2026'},
+  {group:'מילניום',client:'שביט ובניו',supplier:'מטיילי ירון בר',paid:43152.6,advanced:43152.6,chg:24549.9,avail:24549.9,cur:'ILS',approveDate:'03/02/2026'},
+  {group:'מילניום',client:'שביט ובניו',supplier:'עידן 88',paid:0,advanced:0,chg:0,avail:295,cur:'ILS',approveDate:'16/02/2026'},
+  {group:'עיריית באר שבע',client:'עיריית באר שבע',supplier:'מטיילי ירון בר',paid:610583.91,advanced:1847933.71,chg:0,avail:0,cur:'ILS',approveDate:'03/02/2026'},
+  {group:'קבוצת גולף',client:'קבוצת גולף',supplier:'פיור סנט',paid:0,advanced:56852.4,chg:0,avail:477.9,cur:'ILS',approveDate:'26/01/2026'},
+  {group:'קבוצת גולף',client:'קבוצת גולף',supplier:'קרגל',paid:205925.51,advanced:314026.84,chg:0,avail:0,cur:'ILS',approveDate:'05/11/2025'},
+  {group:'קבוצת גולף',client:'קבוצת גולף',supplier:'ארזואן הסעות',paid:529290,advanced:702774,chg:0,avail:0,cur:'ILS',approveDate:'04/10/2025'},
+  {group:'רמי שבירו',client:'רמי שבירו',supplier:'בנק האבן',paid:2643327.32,advanced:2988952.59,chg:0,avail:0,cur:'ILS',approveDate:'08/09/2025'},
+  {group:'רמי שבירו',client:'רמי שבירו',supplier:'הבונים אחים זועבי',paid:829441.4,advanced:1603652.69,chg:0,avail:0,cur:'ILS',approveDate:'01/02/2026'},
+  {group:'שילב',client:'שילב שיווק',supplier:'סימפלי ביבו',paid:512414,advanced:512414,chg:0,avail:89142,cur:'ILS',approveDate:'16/12/2025'},
+  {group:'שילב',client:'שילב שיווק',supplier:'פופיק-יבוא',paid:137129.78,advanced:312183.78,chg:0,avail:43964,cur:'ILS',approveDate:'10/08/2025'},
+  {group:'אלתא מערכות',client:'אלתא מערכות',supplier:'DCX-CHOL',paid:1381174,advanced:2112774,chg:0,avail:17775,cur:'USD',approveDate:'07/01/2026'},
+];
+
+// Compute probability: based on avail>0, history of use, change today
+function calcProb(r){
+  const a=toILS(r.avail,r.cur);
+  if(a<=0) return 0;
+  const historyUsage=r.advanced>0?(r.paid/r.advanced):0;
+  const hasChange=r.chg>0?1:0;
+  const score=0.4*(a>100000?1:a>10000?0.6:0.3)+0.35*Math.min(1,historyUsage)+0.25*hasChange;
+  return Math.min(99,Math.round(score*100));
+}
+
+// ── BUILD TAB 1 ──────────────────────────────────────────────
+const total=fact.reduce((s,r)=>s+toILS(r.amt,r.cur),0);
+const usdAmt=fact.filter(r=>r.cur==='USD').reduce((s,r)=>s+r.amt,0);
+const usdILS=fact.filter(r=>r.cur==='USD').reduce((s,r)=>s+toILS(r.amt,r.cur),0);
+const ilsOnly=total-usdILS;
+const kpis1=[
+  {label:'סה"כ ממומן',val:'₪'+fmt(total),sub:fact.length+' חשבוניות',cls:'blue'},
+  {label:'חשבוניות USD',val:'$'+fmt(usdAmt),sub:'≡ ₪'+fmt(usdILS),cls:'green'},
+  {label:'חשבוניות ILS',val:'₪'+fmt(ilsOnly),sub:fact.filter(r=>r.cur==='ILS').length+' חשבוניות',cls:'teal'},
+  {label:'תאגידים פעילים',val:new Set(fact.map(r=>r.corp)).size,sub:'מממנים: '+new Set(fact.map(r=>r.funder)).size,cls:'red'},
+];
+document.getElementById('kpiRow1').innerHTML=kpis1.map(k=>`<div class="kpi ${k.cls}"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.val}</div><div class="kpi-sub">${k.sub}</div></div>`).join('');
+
+const corpMap={};
+fact.forEach(r=>{
+  if(!corpMap[r.corp])corpMap[r.corp]={total:0,count:0,usd:0,ils:0,funders:new Set()};
+  corpMap[r.corp].total+=toILS(r.amt,r.cur);corpMap[r.corp].count++;
+  if(r.cur==='USD')corpMap[r.corp].usd+=r.amt;else corpMap[r.corp].ils+=r.amt;
+  corpMap[r.corp].funders.add(r.funder);
+});
+const sorted=Object.entries(corpMap).sort((a,b)=>b[1].total-a[1].total);
+const top8=sorted.slice(0,8);
+const COLORS=['#2979d4','#1a9e75','#e09000','#e05252','#7c3aed','#d4537e','#059669','#6b7a99'];
+
+new Chart(document.getElementById('cCorp'),{type:'bar',data:{labels:top8.map(([c])=>c),datasets:[{data:top8.map(([,v])=>Math.round(v.total)),backgroundColor:COLORS,borderRadius:5,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'₪'+fmt(c.raw)}}},scales:{x:{ticks:{callback:v=>'₪'+fmtM(v)},grid:{color:'#f0f2f7'}},y:{ticks:{font:{size:11}}}}}});
+new Chart(document.getElementById('cCount'),{type:'bar',data:{labels:top8.map(([c])=>c.length>10?c.slice(0,10)+'…':c),datasets:[{data:top8.map(([,v])=>v.count),backgroundColor:COLORS,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},autoSkip:false,maxRotation:35}},y:{ticks:{stepSize:1},grid:{color:'#f0f2f7'}}}}});
+
+const fMap={};fact.forEach(r=>{if(!fMap[r.funder])fMap[r.funder]=0;fMap[r.funder]+=toILS(r.amt,r.cur);});
+const fE=Object.entries(fMap).sort((a,b)=>b[1]-a[1]);
+const fC=['#2979d4','#1a9e75','#e09000','#7c3aed'];
+document.getElementById('funderLegend').innerHTML=fE.map(([f,v],i)=>`<div class="legend-item"><div class="legend-dot" style="background:${fC[i]||'#aaa'}"></div><b>${f}</b> ₪${fmt(v)}</div>`).join('');
+new Chart(document.getElementById('cFunder'),{type:'doughnut',data:{labels:fE.map(([f])=>f),datasets:[{data:fE.map(([,v])=>Math.round(v)),backgroundColor:fC,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}},tooltip:{callbacks:{label:c=>c.label+': ₪'+fmt(c.raw)}}}}});
+new Chart(document.getElementById('cCurrency'),{type:'doughnut',data:{labels:['שקלים (ILS)','דולר→₪'],datasets:[{data:[Math.round(ilsOnly),Math.round(usdILS)],backgroundColor:['#1a9e75','#2979d4'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}},tooltip:{callbacks:{label:c=>c.label+': ₪'+fmt(c.raw)}}}}});
+
+const fBadge={דיסקונט:'b-dis',מרכנתיל:'b-mer',לאומי:'b-leu',נימבל:'b-nim'};
+const tbl=document.getElementById('corpTable');
+tbl.innerHTML=`<thead><tr><th>#</th><th>תאגיד</th><th>מממן</th><th>חשבוניות</th><th>סכום (₪)</th><th>% מסה"כ</th><th>USD</th></tr></thead>`;
+const tb=document.createElement('tbody');
+sorted.forEach(([corp,v],i)=>{
+  const pct=(v.total/total*100).toFixed(1);
+  const funders=[...v.funders].map(f=>`<span class="badge ${fBadge[f]||''}">${f}</span>`).join(' ');
+  const usdB=v.usd>0?`<span class="usd-badge">$${fmt(v.usd)}</span>`:'—';
+  const bar=`<div style="display:flex;align-items:center;gap:6px"><div style="height:6px;width:${Math.max(4,pct*2.5)}px;background:#2979d4;border-radius:3px"></div><span>${pct}%</span></div>`;
+  tb.innerHTML+=`<tr><td style="color:#9baac0;font-size:11px">${i+1}</td><td style="font-weight:600">${corp}</td><td>${funders}</td><td style="text-align:center;font-weight:600">${v.count}</td><td style="font-weight:700;color:#1a2744">₪${fmt(v.total)}</td><td>${bar}</td><td>${usdB}</td></tr>`;
+});
+tbl.appendChild(tb);
+
+// ── BUILD TAB 2 ──────────────────────────────────────────────
+const totalAvail=avail.reduce((s,r)=>s+toILS(Math.max(0,r.avail),r.cur),0);
+const totalAdvAll=avail.reduce((s,r)=>s+toILS(r.advanced,r.cur),0);
+const totalPaidAll=avail.reduce((s,r)=>s+toILS(r.paid,r.cur),0);
+const withAvail=avail.filter(r=>r.avail>0).length;
+const chgToday=avail.reduce((s,r)=>s+toILS(Math.max(0,r.chg),r.cur),0);
+
+const kpis2=[
+  {label:'זמין להקדמה היום',val:'₪'+fmt(totalAvail),sub:withAvail+' ספקים עם זמינות',cls:'green'},
+  {label:'שינוי מאתמול',val:'₪'+fmt(chgToday),sub:avail.filter(r=>r.chg>0).length+' ספקים עם שינוי',cls:'teal'},
+  {label:'הוקדם מתחילת פעילות',val:'₪'+fmt(totalAdvAll),sub:'מצטבר כל הספקים',cls:'blue'},
+  {label:'נפרע מתחילת פעילות',val:'₪'+fmt(totalPaidAll),sub:Math.round(totalPaidAll/totalAdvAll*100)+'% מהוקדם',cls:'orange'},
+];
+document.getElementById('kpiRow2').innerHTML=kpis2.map(k=>`<div class="kpi ${k.cls}"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.val}</div><div class="kpi-sub">${k.sub}</div></div>`).join('');
+
+// Group availability chart
+const grpMap={};
+avail.forEach(r=>{
+  if(!grpMap[r.group])grpMap[r.group]=0;
+  grpMap[r.group]+=toILS(Math.max(0,r.avail),r.cur);
+});
+const grpSorted=Object.entries(grpMap).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,10);
+new Chart(document.getElementById('cAvailGroup'),{type:'bar',data:{labels:grpSorted.map(([g])=>g),datasets:[{label:'זמין ₪',data:grpSorted.map(([,v])=>Math.round(v)),backgroundColor:'#2979d4',borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'₪'+fmt(c.raw)}}},scales:{x:{ticks:{callback:v=>'₪'+fmtM(v)},grid:{color:'#f0f2f7'}},y:{ticks:{font:{size:10}}}}}});
+
+// History chart top groups
+const histMap={};
+avail.forEach(r=>{if(!histMap[r.group])histMap[r.group]={p:0,a:0};histMap[r.group].p+=toILS(r.paid,r.cur);histMap[r.group].a+=toILS(r.advanced,r.cur);});
+const histTop=Object.entries(histMap).filter(([,v])=>v.a>0).sort((a,b)=>b[1].a-a[1].a).slice(0,8);
+new Chart(document.getElementById('cHistory'),{type:'bar',data:{labels:histTop.map(([g])=>g.length>10?g.slice(0,10)+'…':g),datasets:[{label:'הוקדם',data:histTop.map(([,v])=>Math.round(v.a)),backgroundColor:'#2979d4',borderRadius:3},{label:'נפרע',data:histTop.map(([,v])=>Math.round(v.p)),backgroundColor:'#1a9e75',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:12}}},scales:{x:{ticks:{font:{size:10},maxRotation:30}},y:{ticks:{callback:v=>'₪'+fmtM(v)},grid:{color:'#f0f2f7'}}}}});
+
+// Availability table with group filter
+const groups=['הכל',...new Set(avail.map(r=>r.group))].slice(0,20);
+let activeGroup='הכל';
+const filterDiv=document.getElementById('groupFilters');
+groups.forEach(g=>{
+  const btn=document.createElement('button');
+  btn.className='filter-btn'+(g==='הכל'?' active':'');
+  btn.textContent=g;
+  btn.onclick=()=>{activeGroup=g;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderAvailTable();};
+  filterDiv.appendChild(btn);
+});
+
+function renderAvailTable(){
+  const rows=activeGroup==='הכל'?avail:avail.filter(r=>r.group===activeGroup);
+  const t=document.getElementById('availTable');
+  t.innerHTML=`<thead><tr><th>קבוצה</th><th>לקוח</th><th>ספק</th><th>זמין להקדמה</th><th>שינוי מאתמול</th><th>הוקדם (מצטבר)</th><th>נפרע (מצטבר)</th><th>הסתברות</th></tr></thead>`;
+  const tb2=document.createElement('tbody');
+  const rowsSorted=[...rows].sort((a,b)=>toILS(b.avail,b.cur)-toILS(a.avail,a.cur));
+  rowsSorted.forEach(r=>{
+    const availILS=toILS(r.avail,r.cur);
+    const prob=calcProb(r);
+    let probTag,probClass;
+    if(prob>=60){probTag='גבוהה '+prob+'%';probClass='tag-high';}
+    else if(prob>=30){probTag='בינונית '+prob+'%';probClass='tag-med';}
+    else if(prob>0){probTag='נמוכה '+prob+'%';probClass='tag-low';}
+    else{probTag='לא זמין';probClass='tag-zero';}
+    const chgCell=r.chg>0?`<span class="chg-pos">+₪${fmt(toILS(r.chg,r.cur))}</span>`:r.chg<0?`<span class="chg-neg">₪${fmt(toILS(r.chg,r.cur))}</span>`:`<span class="chg-zero">—</span>`;
+    const availCell=availILS>0?`<b style="color:#1a2744">₪${fmt(availILS)}</b>${r.cur==='USD'?' <span class="usd-badge">USD</span>':''}`:'<span style="color:#c0c8d8">—</span>';
+    tb2.innerHTML+=`<tr><td><span style="font-size:10px;background:#eef0f7;padding:2px 7px;border-radius:10px;color:#4a5568">${r.group}</span></td><td style="font-size:11px;color:#6b7a99">${r.client}</td><td style="font-weight:500">${r.supplier}</td><td>${availCell}</td><td>${chgCell}</td><td>₪${fmt(toILS(r.advanced,r.cur))}</td><td>₪${fmt(toILS(r.paid,r.cur))}</td><td><span class="${probClass}">${probTag}</span></td></tr>`;
+  });
+  t.appendChild(tb2);
+}
+renderAvailTable();
+
+// ── BUILD TAB 3: ELEKTRA ─────────────────────────────────────
+const EXCLUDED = ['ברימאג דיגיטל', 'שריג אלקטריק'];
+const elektraRows = avail.filter(r => r.group === 'אלקטרה קמעונאות');
+const elektraActive = elektraRows.filter(r => !EXCLUDED.some(x => r.supplier.includes(x.split(' ')[0])));
+const elektraExcluded = elektraRows.filter(r => EXCLUDED.some(x => r.supplier.includes(x.split(' ')[0])));
+
+const eAvailTotal = elektraActive.reduce((s,r) => s + toILS(Math.max(0,r.avail),r.cur), 0);
+const eAvailAll = elektraRows.reduce((s,r) => s + toILS(Math.max(0,r.avail),r.cur), 0);
+const eAdvTotal = elektraActive.reduce((s,r) => s + toILS(r.advanced,r.cur), 0);
+const eChgTotal = elektraActive.reduce((s,r) => s + toILS(Math.max(0,r.chg),r.cur), 0);
+const excludedAvail = elektraExcluded.reduce((s,r) => s + toILS(Math.max(0,r.avail),r.cur), 0);
+
+const kpis3 = [
+  {label:'זמין להקדמה (ללא ברימאג+שריג)', val:'₪'+fmt(eAvailTotal), sub:'מתוך ₪'+fmt(eAvailAll)+' סה"כ זמין', cls:'green'},
+  {label:'מוחרג (ברימאג + שריג)', val:'₪'+fmt(excludedAvail), sub:'לא יוקדם לפי הנחה', cls:'red'},
+  {label:'שינוי מאתמול (ספקים פעילים)', val:'₪'+fmt(eChgTotal), sub:elektraActive.filter(r=>r.chg>0).length+' ספקים עם עלייה', cls:'teal'},
+  {label:'הוקדם מצטבר (ספקים פעילים)', val:'₪'+fmt(eAdvTotal), sub:elektraActive.filter(r=>r.avail>0).length+' ספקים עם זמינות', cls:'blue'},
+];
+document.getElementById('kpiRow3').innerHTML = kpis3.map(k =>
+  `<div class="kpi ${k.cls}"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.val}</div><div class="kpi-sub">${k.sub}</div></div>`
+).join('');
+
+// Chart: available by supplier (excluding)
+const eChartRows = elektraActive.filter(r => r.avail > 0).sort((a,b) => toILS(b.avail,b.cur) - toILS(a.avail,a.cur));
+new Chart(document.getElementById('cElektraAvail'), {
+  type: 'bar',
+  data: {
+    labels: eChartRows.map(r => r.supplier.length > 14 ? r.supplier.slice(0,14)+'…' : r.supplier),
+    datasets: [{
+      data: eChartRows.map(r => Math.round(toILS(r.avail, r.cur))),
+      backgroundColor: eChartRows.map(r => r.chg > 0 ? '#1a9e75' : '#2979d4'),
+      borderRadius: 4
+    }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => '₪'+fmt(c.raw) } } },
+    scales: { x: { ticks: { callback: v => '₪'+fmtM(v) }, grid: { color: '#f0f2f7' } }, y: { ticks: { font: { size: 10 } } } }
+  }
+});
+
+// Chart: history by top suppliers
+const eHistRows = [...elektraRows].sort((a,b) => toILS(b.advanced,b.cur)-toILS(a.advanced,a.cur)).slice(0,8);
+const isExcl = r => EXCLUDED.some(x => r.supplier.includes(x.split(' ')[0]));
+new Chart(document.getElementById('cElektraHistory'), {
+  type: 'bar',
+  data: {
+    labels: eHistRows.map(r => r.supplier.length > 12 ? r.supplier.slice(0,12)+'…' : r.supplier),
+    datasets: [
+      { label: 'הוקדם', data: eHistRows.map(r => Math.round(toILS(r.advanced,r.cur))), backgroundColor: eHistRows.map(r => isExcl(r) ? '#e0c8fa' : '#2979d4'), borderRadius: 3 },
+      { label: 'נפרע',  data: eHistRows.map(r => Math.round(toILS(r.paid,r.cur))),     backgroundColor: eHistRows.map(r => isExcl(r) ? '#c8f0e0' : '#1a9e75'), borderRadius: 3 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top', labels: { font: { size: 11 }, boxWidth: 12 } }, tooltip: { callbacks: { label: c => c.dataset.label+': ₪'+fmt(c.raw) } } },
+    scales: { x: { ticks: { font: { size: 9 }, maxRotation: 35 } }, y: { ticks: { callback: v => '₪'+fmtM(v) }, grid: { color: '#f0f2f7' } } }
+  }
+});
+
+// Detailed table
+const etbl = document.getElementById('elektraTable');
+etbl.innerHTML = `<thead><tr><th>ספק</th><th>זמין להקדמה</th><th>שינוי מאתמול</th><th>הוקדם מצטבר</th><th>נפרע מצטבר</th><th>% ניצול</th><th>הסתברות</th><th>הערה</th></tr></thead>`;
+const etb = document.createElement('tbody');
+[...elektraRows].sort((a,b) => toILS(b.avail,b.cur)-toILS(a.avail,a.cur)).forEach(r => {
+  const excl = isExcl(r);
+  const availILS = toILS(Math.max(0,r.avail),r.cur);
+  const advILS = toILS(r.advanced,r.cur);
+  const paidILS = toILS(r.paid,r.cur);
+  const util = advILS > 0 ? Math.round(paidILS/advILS*100) : 0;
+  const prob = excl ? 0 : calcProb(r);
+  let probTag, probClass;
+  if (excl) { probTag = 'מוחרג'; probClass = 'tag-zero'; }
+  else if (prob >= 60) { probTag = 'גבוהה '+prob+'%'; probClass = 'tag-high'; }
+  else if (prob >= 30) { probTag = 'בינונית '+prob+'%'; probClass = 'tag-med'; }
+  else if (prob > 0)   { probTag = 'נמוכה '+prob+'%';  probClass = 'tag-low'; }
+  else                 { probTag = 'לא זמין'; probClass = 'tag-zero'; }
+  const chgCell = r.chg > 0 ? `<span class="chg-pos">+₪${fmt(toILS(r.chg,r.cur))}</span>` : `<span class="chg-zero">—</span>`;
+  const availCell = availILS > 0 ? `<b style="color:${excl?'#9baac0':'#1a2744'}">₪${fmt(availILS)}</b>` : '<span style="color:#c0c8d8">—</span>';
+  const rowStyle = excl ? 'background:#fdf6ff;opacity:.75' : '';
+  const note = excl ? `<span style="font-size:10px;color:#b45309;background:#fff3e0;padding:2px 7px;border-radius:8px">לא יוקדם</span>` : '';
+  const utilBar = advILS > 0 ? `<div style="display:flex;align-items:center;gap:5px"><div style="height:5px;width:${Math.min(60,util*0.6)}px;background:${util>80?'#e05252':'#2979d4'};border-radius:3px"></div><span style="font-size:11px">${util}%</span></div>` : '—';
+  etb.innerHTML += `<tr style="${rowStyle}"><td style="font-weight:500">${r.supplier}</td><td>${availCell}</td><td>${chgCell}</td><td>₪${fmt(advILS)}</td><td>₪${fmt(paidILS)}</td><td>${utilBar}</td><td><span class="${probClass}">${probTag}</span></td><td>${note}</td></tr>`;
+});
+etbl.appendChild(etb);
+
+// Tab switch
+function switchTab(id){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
 </html>
